@@ -86,6 +86,29 @@ impl Board {
         hash ^ ZVALS.cr[usize::from(self.rights)] ^ ZVALS.c[self.stm()]
     }
 
+    #[must_use]
+    pub fn pawn_hash(&self) -> u64 {
+        let mut hash = 0;
+
+        let pawns = self.piece(Piece::PAWN);
+
+        let mut wp = pawns & self.bb[Side::WHITE];
+
+        while wp != 0 {
+            pop_lsb!(sq, wp);
+            hash ^= ZVALS.pcs[Side::WHITE][Piece::PAWN][usize::from(sq)];
+        }
+
+        let mut bp = pawns & self.bb[Side::BLACK];
+
+        while bp != 0 {
+            pop_lsb!(sq, bp);
+            hash ^= ZVALS.pcs[Side::BLACK][Piece::PAWN][usize::from(sq)];
+        }
+
+        hash
+    }
+
     // POSITION INFO
 
     #[must_use]

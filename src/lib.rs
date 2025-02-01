@@ -1,4 +1,5 @@
 pub mod chess;
+mod corrhist;
 pub mod mcts;
 pub mod networks;
 pub mod tree;

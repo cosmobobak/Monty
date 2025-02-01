@@ -1,5 +1,6 @@
 use crate::{
     chess::{ChessState, Move},
+    corrhist::CorrectionHistoryTable,
     mcts::{Limits, MctsParams, SearchHelpers, Searcher},
     networks::{PolicyNetwork, ValueNetwork},
     tree::Tree,
@@ -82,8 +83,12 @@ pub fn run(policy: &PolicyNetwork, value: &ValueNetwork) {
             "perft" => run_perft(&commands, &pos),
             "quit" => std::process::exit(0),
             "eval" => {
-                println!("cp: {}", pos.get_value(value, &params));
-                println!("wdl: {:.2}%", 100.0 * pos.get_value_wdl(value, &params));
+                let dummy_corrhist = CorrectionHistoryTable::boxed();
+                println!("cp: {}", pos.get_value(value, &params, &dummy_corrhist));
+                println!(
+                    "wdl: {:.2}%",
+                    100.0 * pos.get_value_wdl(value, &params, &dummy_corrhist)
+                );
             }
             "policy" => {
                 let f = pos.get_policy_feats(policy);

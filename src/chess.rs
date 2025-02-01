@@ -5,6 +5,7 @@ mod frc;
 mod moves;
 
 use crate::{
+    corrhist::CorrectionHistoryTable,
     mcts::MctsParams,
     networks::{Accumulator, PolicyNetwork, ValueNetwork, POLICY_L1},
 };
@@ -140,7 +141,12 @@ impl ChessState {
         self.board.piece(piece).count_ones() as i32
     }
 
-    pub fn get_value(&self, value: &ValueNetwork, _params: &MctsParams) -> i32 {
+    pub fn get_value(
+        &self,
+        value: &ValueNetwork,
+        _params: &MctsParams,
+        _pawn_corrhist: &CorrectionHistoryTable,
+    ) -> i32 {
         const K: f32 = 400.0;
         let (win, draw, _) = value.eval(&self.board);
 
@@ -158,15 +164,24 @@ impl ChessState {
 
             mat = _params.material_offset() + mat / _params.material_div1();
 
-            cp * mat / _params.material_div2()
+            let cp = cp * mat / _params.material_div2();
+
+            let correction = _pawn_corrhist.correction(_params, &self.board);
+
+            cp + correction
         }
 
         #[cfg(feature = "datagen")]
         cp
     }
 
-    pub fn get_value_wdl(&self, value: &ValueNetwork, params: &MctsParams) -> f32 {
-        1.0 / (1.0 + (-(self.get_value(value, params) as f32) / 400.0).exp())
+    pub fn get_value_wdl(
+        &self,
+        value: &ValueNetwork,
+        params: &MctsParams,
+        pawn_corrhist: &CorrectionHistoryTable,
+    ) -> f32 {
+        1.0 / (1.0 + (-(self.get_value(value, params, pawn_corrhist) as f32) / 400.0).exp())
     }
 
     pub fn perft(&self, depth: usize) -> u64 {

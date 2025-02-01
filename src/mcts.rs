@@ -7,6 +7,7 @@ pub use params::MctsParams;
 
 use crate::{
     chess::{GameState, Move},
+    corrhist::CorrectionHistoryTable,
     networks::{PolicyNetwork, ValueNetwork},
     tree::{NodePtr, Tree},
 };
@@ -36,10 +37,11 @@ pub struct SearchStats {
 
 pub struct Searcher<'a> {
     tree: &'a Tree,
-    params: &'a MctsParams,
+    pub params: &'a MctsParams,
     policy: &'a PolicyNetwork,
     value: &'a ValueNetwork,
     abort: &'a AtomicBool,
+    pub pawn_corrhist: Box<CorrectionHistoryTable>,
 }
 
 impl<'a> Searcher<'a> {
@@ -56,6 +58,7 @@ impl<'a> Searcher<'a> {
             policy,
             value,
             abort,
+            pawn_corrhist: CorrectionHistoryTable::boxed(),
         }
     }
 
@@ -260,7 +263,7 @@ impl<'a> Searcher<'a> {
             self.tree[ptr].clear();
             self.tree.expand_node(ptr, pos, self.params, self.policy, 1);
 
-            let root_eval = pos.get_value_wdl(self.value, self.params);
+            let root_eval = pos.get_value_wdl(self.value, self.params, &self.pawn_corrhist);
             self.tree[ptr].update(1.0 - root_eval);
         }
         // relabel preexisting root policies with root PST value
