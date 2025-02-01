@@ -86,7 +86,7 @@ pub fn perform_one(
 
     // once every few nodes, update the correction history
     let visits = node.visits();
-    if visits % 128 == 0 {
+    if visits % 16 == 0 {
         // project back from q-space into cp-space:
         let projected = (400.0 * f32::ln(1.0 / (1.0 - new_q))) as i32;
         // determine the static evaluation of the position
