@@ -88,7 +88,7 @@ pub fn perform_one(
     let visits = node.visits();
     if visits % 16 == 0 {
         // project back from q-space into cp-space:
-        let projected = (400.0 * f32::ln(1.0 / (1.0 - new_q))) as i32;
+        let projected = (400.0 * f32::ln(1.0 / new_q)) as i32;
         // determine the static evaluation of the position
         let value = pos.get_value(searcher.value, searcher.params, &searcher.pawn_corrhist);
         // determine the difference between the two
