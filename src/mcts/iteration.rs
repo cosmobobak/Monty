@@ -85,7 +85,8 @@ pub fn perform_one(
     tree.push_hash(hash, 1.0 - new_q);
 
     // once every few nodes, update the correction history
-    if node.visits() % 128 == 0 {
+    let visits = node.visits();
+    if visits % 128 == 0 {
         // project back from q-space into cp-space:
         let projected = (400.0 * f32::ln(1.0 / (1.0 - new_q))) as i32;
         // determine the static evaluation of the position
@@ -93,7 +94,7 @@ pub fn perform_one(
         // determine the difference between the two
         let diff = (projected - value) as i32;
         // update the correction history
-        searcher.pawn_corrhist.update_correction_history(&pos.board(), *depth as i32, diff);
+        searcher.pawn_corrhist.update_correction_history(&pos.board(), visits / 1024, diff);
     }
 
     Some(u)
